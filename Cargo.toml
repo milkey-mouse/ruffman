@@ -1,0 +1,17 @@
+[package]
+name = "ruffman"
+version = "0.1.0"
+authors = ["Milkey Mouse <milkeymouse@meme.institute>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "ruffman"
+
+[[bin]]
+name = "ruffman"
+path = "src/bin.rs"
+
+[dependencies]
+memmap = "0.7.0"
