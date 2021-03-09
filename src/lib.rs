@@ -35,9 +35,7 @@ pub fn analyze<'a>(symbol_size: usize, inputs: impl IntoIterator<Item = &'a mut 
             }
 
             for symbol in buffer.windows(symbol_size) {
-                eprintln!("processing symbol {:?}", symbol);
                 if let Some(count) = symbol_counts.get_mut(symbol) {
-                    eprintln!("seen");
                     *count += 1;
                 } else {
                     symbol_counts.insert(symbol.to_vec(), 1);
@@ -47,24 +45,19 @@ pub fn analyze<'a>(symbol_size: usize, inputs: impl IntoIterator<Item = &'a mut 
             // TODO: make remainder work if buffer is smaller than symbol size (unlikely, but possible)
 
             remainder.extend_from_slice(&buffer[buffer.len()-symbol_size+1..]);
-            assert_eq!(remainder.len(), (symbol_size-1));
+            //assert_eq!(remainder.len(), (symbol_size-1));
 
             let length = buffer.len();
             input.consume(length);
         }
     }
 
-    dbg!(&symbol_counts);
-
     let mut top_symbols = symbol_counts
         .into_iter()
         .map(|(symbol, frequency)| ReverseWeightedNode::leaf(symbol, frequency))
-        .collect::<BinaryHeap<_>>();
+        .collect::<BinaryHeap<_>>(); // TODO: roll your own min-heap
 
     loop {
-        for node in &top_symbols {
-            eprintln!("{}", node);
-        }
         match (top_symbols.pop(), top_symbols.pop()) {
             (Some(a), Some(b)) => top_symbols.push(ReverseWeightedNode::parent(a, b)),
             (Some(a), None) => {
@@ -73,7 +66,7 @@ pub fn analyze<'a>(symbol_size: usize, inputs: impl IntoIterator<Item = &'a mut 
             },
             (None, Some(_)) => unreachable!(),
             (None, None) => {
-                dbg!("warning: all nones in match");
+                eprintln!("warning: all nones in match");
                 // this can happen if there were no symbols at all
                 // (i.e. the input files were empty)
                 break;
